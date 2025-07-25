@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import ErrorMess from "../components/ErrorMess";
 import type { RegisterForm } from "../types";
@@ -15,6 +15,7 @@ export default function RegisterView() {
         password_confirmation: ''
     }
     const { register, watch, handleSubmit, formState: { errors }, reset } = useForm({ defaultValues: initialValues });
+    const navigate = useNavigate();
 
     const pass = watch('password');
 
@@ -23,6 +24,7 @@ export default function RegisterView() {
             const { data } = await api.post(`/auth/register`, formData);
             toast.success(data);
             reset();
+            navigate('/auth/login');
         } catch (error) {
             if (isAxiosError(error)){
                 toast.error(error.response?.data.error);

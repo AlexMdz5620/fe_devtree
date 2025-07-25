@@ -20,11 +20,11 @@ export type LoginForm = Pick<User, "email"> & {
 
 export type ProfileForm = Pick<User, "handle" | "description">;
 
-export type SocialNetworks = {
+export type SocialNetwork = {
     id: number;
     name: string;
     url: string;
     enabled: boolean;
 }
 
-export type DevTreeLink = Pick<SocialNetworks, 'name' | 'url' | 'enabled'>
+export type DevTreeLink = Pick<SocialNetwork, 'name' | 'url' | 'enabled'>
