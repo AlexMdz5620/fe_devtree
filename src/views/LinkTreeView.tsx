@@ -44,67 +44,61 @@ export default function LinkTreeView() {
     const updatedLinks = devTreeLinks.map(link => {
       if (link.name === socialNetworks) {
         if (isValidUrl(link.url)) {
-          return { ...link, enabled: !link.enabled }
+          return { ...link, enabled: !link.enabled };
         } else {
           toast.error('URL no válida');
         }
       }
-      return link
+      return link;
     });
 
     setDevTreeLinks(updatedLinks);
 
-    let updatedItems: SocialNetwork[] = []
-    const selectedSocialNetwork = updatedLinks.find(link => link.name === socialNetworks);
-    if (selectedSocialNetwork?.enabled) {
-      const id = links.filter(link => link.id).length + 1;
-      if (links.some(link => link.name === socialNetworks)) {
-        updatedItems = links.map(link => {
-          if (link.name === socialNetworks) {
-            return {
-              ...link,
-              enabled: true,
-              id,
-            }
-          } else {
-            return link
-          }
-        })
+    const selectedLink = updatedLinks.find(link => link.name === socialNetworks);
+    const existing = links.find(link => link.name === socialNetworks);
+    let updatedItems: SocialNetwork[] = [];
+
+    if (selectedLink?.enabled) {
+      // Rehabilitando el link
+      const maxId = Math.max(0, ...links.map(link => link.id || 0));
+      const newId = existing?.id && existing.id > 0 ? existing.id : maxId + 1;
+
+      if (existing) {
+        updatedItems = links.map(link =>
+          link.name === socialNetworks
+            ? { ...link, enabled: true, id: newId }
+            : link
+        );
       } else {
-        const newItem = {
-          ...selectedSocialNetwork,
-          id,
-        }
-        updatedItems = [...links, newItem];
+        updatedItems = [...links, { ...selectedLink, id: newId }];
       }
+
     } else {
-      const indexToUpdate = links.findIndex(link => link.name === socialNetworks);
-      updatedItems = links.map(link => {
-        if (link.name === socialNetworks) {
-          return {
-            ...link,
-            id: 0,
-            enabled: false,
+      // Deshabilitando el link
+      const disabledLink = links.find(link => link.name === socialNetworks);
+      if (!disabledLink) return;
+
+      const disabledId = disabledLink.id;
+
+      updatedItems = links
+        .map(link => {
+          if (link.name === socialNetworks) {
+            return { ...link, enabled: false, id: 0 }; // desactivado
+          } else if (link.id > disabledId) {
+            return { ...link, id: link.id - 1 }; // reacomodar
           }
-        } else if (link.id > indexToUpdate) {
-          return {
-            ...link,
-            id: link.id - 1
-          }
-        } else {
-          return link
-        }
-      })
+          return link;
+        })
+        .filter(link => link.id !== 0 || link.enabled); // opcional: eliminar los desactivados si quieres
     }
 
-    // Almacenar en la DB
-    queryClient.setQueryData(['user'], (prevData: User) => {
-      return {
-        ...prevData,
-        links: JSON.stringify(updatedItems),
-      }
-    });
-  }
+    queryClient.setQueryData(['user'], (prevData: User) => ({
+      ...prevData,
+      links: JSON.stringify(updatedItems),
+    }));
+  };
+
+
 
   return (
     <div className="space-y-5">
@@ -118,7 +112,7 @@ export default function LinkTreeView() {
       ))}
       <button
         className="bg-cyan-400 p-2 text-lg w-full uppercase text-slate-600 rounded font-bold"
-        onClick={() => mutate(user)}
+        onClick={() => mutate(queryClient.getQueryData(['user'])!)}
       >
         Guardar cambios
       </button>
