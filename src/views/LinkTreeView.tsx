@@ -31,7 +31,7 @@ export default function LinkTreeView() {
     });
 
     setDevTreeLinks(updateData);
-  }, []);
+  }, [devTreeLinks, user.links]);
 
   const handleUrlChange = (e: ChangeEvent<HTMLInputElement>) => {
     const updatedLinks = devTreeLinks.map(link => link.name === e.target.name ? { ...link, url: e.target.value } : link);

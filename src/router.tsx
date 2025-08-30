@@ -21,9 +21,10 @@ export default function Router() {
                     <Route index={true} element={<LinkTreeView />} />
                     <Route path="profile" element={<ProfileView />} />
                 </Route>
-                <Route path="/:handle" element={<AuthLayout />}>
+                {/* <Route path="/:handle" element={<AuthLayout />}>
                     <Route element={<HandleView />} index={true} />
-                </Route>
+                </Route> */}
+                <Route path='/:handle' element={<HandleView />} index={true} />
                 <Route path="/" element={<HomeView />} />
                 <Route path="/404" element={<AuthLayout />}>
                     <Route element={<NotFoundView />} index={true} />
